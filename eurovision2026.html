@@ -126,9 +126,10 @@
   #reveal-input { width: 120px !important; font-size: 22px !important; font-weight: 700 !important; padding: 10px !important; }
 
   .country-list { list-style: none; }
+  /* Unrevealed country list */
   .country-row {
-    display: grid; grid-template-columns: 30px 1fr 70px 80px 90px 36px;
-    align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; margin-bottom: 4px; font-size: 14px;
+    display: grid; grid-template-columns: 26px 1fr 56px 120px 80px 30px;
+    align-items: center; gap: 8px; padding: 9px 10px; border-radius: 7px; margin-bottom: 4px; font-size: 14px;
   }
   .country-row.is-next { background: rgba(255,215,0,.08); border: 1px solid rgba(255,215,0,.25); }
   .country-row.eliminated { opacity: .38; }
@@ -136,13 +137,33 @@
   .col-pos { color: var(--text-dim); font-size: 12px; text-align: right; }
   .col-name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
   .col-jury { text-align: center; color: var(--text-dim); font-size: 13px; }
-  .col-tv { text-align: center; font-weight: 700; }
-  .col-total { text-align: center; font-weight: 800; font-size: 15px; }
+  .col-needs { text-align: center; }
+  .col-max { text-align: center; color: var(--text-dim); font-size: 13px; }
   .col-icon { text-align: center; font-size: 18px; }
-  .tv-revealed { color: var(--gold); }
-  .tv-pending { color: var(--text-dim); font-style: italic; }
-  .total-revealed { color: var(--text); }
-  .total-pending { color: var(--text-dim); font-size: 12px; }
+
+  .needs-badge {
+    display: inline-block; padding: 3px 8px; border-radius: 4px;
+    font-size: 13px; font-weight: 700; white-space: nowrap;
+  }
+  .needs-badge.reachable {
+    background: rgba(255,215,0,.12); border: 1px solid rgba(255,215,0,.35); color: var(--gold);
+  }
+  .needs-badge.unreachable {
+    background: rgba(255,51,102,.08); border: 1px solid rgba(255,51,102,.25); color: var(--red);
+  }
+  .needs-badge.leading {
+    background: rgba(0,232,122,.1); border: 1px solid rgba(0,232,122,.3); color: var(--green);
+  }
+  .needs-badge.guaranteed {
+    background: rgba(0,232,122,.12); border: 1px solid var(--green); color: var(--green);
+  }
+
+  .list-header {
+    display: grid; grid-template-columns: 26px 1fr 56px 120px 80px 30px;
+    gap: 8px; padding: 4px 10px 6px; font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim);
+    border-bottom: 1px solid var(--border); margin-bottom: 6px;
+  }
   .estimates { font-size: 11px; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
   .estimates em { color: var(--blue); font-style: normal; }
 
@@ -565,35 +586,58 @@ function renderTelvote(E) {
     html += `<div class="card" style="text-align:center;padding:16px;color:var(--text-dim)">All ${totalCount} countries revealed.</div>`;
   }
 
-  // Country list
-  html += `<ul class="country-list">`;
-  countries.forEach((c, i) => {
-    const cls = [c.isNext?'is-next':'', c.isRevealed?'revealed':'', c.status==='eliminated'?'eliminated':''].filter(Boolean).join(' ');
-    const icon = {leading:'🏆', guaranteed:'🏆', eliminated:'❌', pending:'⏳', confirmed:'✅'}[c.status] || '⬜';
-    const tvCell = c.isRevealed ? `<span class="tv-revealed">${c.tv}</span>` : `<span class="tv-pending">—</span>`;
-    const totalCell = c.isRevealed ? `<span class="total-revealed">${c.combined}</span>` : `<span class="total-pending">≤${c.maxPossible}</span>`;
-    let est = '';
-    if (!c.isRevealed && c.status !== 'eliminated') {
-      const needsPart = c.neededToLead === 0
-        ? `<em style="color:var(--green)">leads now</em>`
-        : c.neededToLead !== null
-          ? `needs <em style="color:${c.canReachLead ? 'var(--blue)' : 'var(--red)'}">${c.neededToLead}</em> to lead`
-          : '';
-      const fairPart = c.fairShare !== null ? `~<em>${c.fairShare}</em> est` : '';
-      const parts = [needsPart, fairPart].filter(Boolean).join(' · ');
-      if (parts) est = `<div class="estimates">${parts}</div>`;
-    }
+  // Country list — unrevealed only (revealed countries are in the leaderboard)
+  const unrevealed = countries.filter(c => !c.isRevealed);
+  if (unrevealed.length > 0) {
     html += `
-      <li class="country-row ${cls}">
-        <span class="col-pos">${i+1}</span>
-        <span class="col-name"><span class="flag">${c.flag}</span><span>${esc(c.name)}${est}</span></span>
-        <span class="col-jury">${c.jury}</span>
-        <span class="col-tv">${tvCell}</span>
-        <span class="col-total">${totalCell}</span>
-        <span class="col-icon">${icon}</span>
-      </li>`;
-  });
-  html += `</ul>`;
+      <div class="list-header">
+        <span></span>
+        <span>Awaiting reveal</span>
+        <span style="text-align:center">Jury</span>
+        <span style="text-align:center">Needs to lead</span>
+        <span style="text-align:center">Max total</span>
+        <span></span>
+      </div>
+      <ul class="country-list">`;
+
+    unrevealed.forEach(c => {
+      const isElim = c.status === 'eliminated';
+      const isGuaranteed = c.status === 'guaranteed';
+      const cls = [c.isNext?'is-next':'', isElim?'eliminated':''].filter(Boolean).join(' ');
+      const icon = isGuaranteed ? '🏆' : isElim ? '❌' : c.isNext ? '⏳' : '⬜';
+
+      // Needs-to-lead badge
+      let needsBadge;
+      if (isElim) {
+        needsBadge = `<span class="needs-badge unreachable">can't win</span>`;
+      } else if (isGuaranteed) {
+        needsBadge = `<span class="needs-badge guaranteed">🏆 won</span>`;
+      } else if (c.neededToLead === 0) {
+        needsBadge = `<span class="needs-badge leading">leads already</span>`;
+      } else {
+        const cls2 = c.canReachLead ? 'reachable' : 'unreachable';
+        needsBadge = `<span class="needs-badge ${cls2}">${c.neededToLead} pts</span>`;
+      }
+
+      const estParts = [];
+      if (c.fairShare !== null) estParts.push(`~${c.fairShare} est`);
+      if (c.trendFloor)         estParts.push(`≥${c.trendFloor} trend`);
+      const est = estParts.length ? `<div class="estimates">${estParts.join(' · ')}</div>` : '';
+
+      html += `
+        <li class="country-row ${cls}">
+          <span class="col-pos">${c.pos + 1}</span>
+          <span class="col-name"><span class="flag">${c.flag}</span><span>${esc(c.name)}${est}</span></span>
+          <span class="col-jury">${c.jury}</span>
+          <span class="col-needs">${needsBadge}</span>
+          <span class="col-max">≤${c.maxPossible}</span>
+          <span class="col-icon">${icon}</span>
+        </li>`;
+    });
+    html += `</ul>`;
+  } else if (isComplete) {
+    html += `<p style="text-align:center;color:var(--text-dim);padding:16px 0;font-size:14px">All countries revealed — see leaderboard →</p>`;
+  }
 
   document.getElementById('main-panel').innerHTML = html;
   const ri = document.getElementById('reveal-input');
