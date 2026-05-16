@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eurovision 2026 Live Voting Tracker</title>
+<style>
+  :root {
+    --bg:        #08031a;
+    --bg-card:   #120730;
+    --bg-input:  #1c0e45;
+    --border:    #2d1a5e;
+    --gold:      #ffd700;
+    --gold-dim:  #a88a00;
+    --gold-glow: rgba(255,215,0,.15);
+    --text:      #ede6ff;
+    --text-dim:  #8870bb;
+    --green:     #00e87a;
+    --red:       #ff3366;
+    --blue:      #4dabf7;
+    --leader-bg: rgba(255,215,0,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #12043a 0%, #1a0650 50%, #12043a 100%);
+    border-bottom: 2px solid var(--gold-dim);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 24px rgba(0,0,0,.6);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-star { font-size: 28px; }
+  .logo-text {
+    font-size: 22px; font-weight: 800; letter-spacing: 1px;
+    background: linear-gradient(90deg, #ffd700, #ffec6e, #ffd700);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .logo-sub { font-size: 12px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .app-layout { display: grid; grid-template-columns: 1fr 360px; height: calc(100vh - 70px); }
+  #main-panel { padding: 20px 24px; overflow-y: auto; border-right: 1px solid var(--border); }
+  #side-panel { padding: 16px; overflow-y: auto; background: var(--bg-card); }
+
+  .btn {
+    padding: 9px 18px; border: none; border-radius: 6px;
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-gold { background: linear-gradient(135deg,#c8960a,#ffd700,#c8960a); color: #1a0a00; }
+  .btn-gold:hover { filter: brightness(1.12); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
+  .btn-outline:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .btn-danger { background: transparent; border: 1px solid #5a1a2a; color: #ff6688; }
+  .btn-danger:hover { background: rgba(255,51,102,.12); }
+  .btn-blue { background: rgba(77,171,247,.15); border: 1px solid #2d6ea0; color: var(--blue); }
+  .btn-blue:hover { background: rgba(77,171,247,.25); }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-lg { padding: 13px 28px; font-size: 16px; font-weight: 700; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  .card-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 14px; }
+
+  input[type=number] {
+    background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); font-size: 16px; padding: 8px 12px; outline: none;
+    transition: border-color .15s; width: 100%; text-align: center;
+  }
+  input[type=number]:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 2px var(--gold-glow); }
+
+  .phase-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--gold-glow); border: 1px solid var(--gold-dim); border-radius: 20px;
+    padding: 3px 12px; font-size: 12px; font-weight: 700; color: var(--gold);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px;
+  }
+  .test-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(77,171,247,.1); border: 1px solid rgba(77,171,247,.3); border-radius: 20px;
+    padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--blue);
+    letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
+  }
+
+  /* Jury table */
+  .jury-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .jury-table th { text-align: left; color: var(--text-dim); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .jury-table td { padding: 6px 10px; border-bottom: 1px solid rgba(45,26,94,.5); vertical-align: middle; }
+  .jury-table tr:hover td { background: rgba(255,215,0,.03); }
+  .flag-name { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+  .flag { font-size: 22px; line-height: 1; }
+  .jury-input { width: 90px !important; font-size: 15px !important; padding: 6px 8px !important; }
+  .jury-total-row { background: var(--bg-input); border-top: 2px solid var(--border) !important; }
+  .jury-total-row td { padding: 12px 10px; font-weight: 700; font-size: 16px; border-bottom: none !important; }
+  .total-ok { color: var(--green); }
+  .total-warn { color: var(--gold); }
+  .total-over { color: var(--red); }
+
+  /* Televote */
+  .progress-bar-wrap { background: var(--bg-input); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg,#ffa500,#ffd700); border-radius: 8px; transition: width .4s ease; }
+  .progress-label { font-size: 13px; color: var(--text-dim); display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .progress-label span { color: var(--gold); font-weight: 700; }
+
+  .next-card {
+    background: linear-gradient(135deg,#1a0a3d 0%,#2a1060 100%);
+    border: 2px solid var(--gold-dim); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
+    box-shadow: 0 0 30px rgba(255,215,0,.1);
+  }
+  .next-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 8px; }
+  .next-country { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .next-flag { font-size: 42px; line-height: 1; }
+  .next-name { font-size: 28px; font-weight: 800; color: var(--text); }
+  .next-jury { font-size: 15px; color: var(--text-dim); margin-top: 2px; }
+  .next-jury strong { color: var(--gold); }
+  .reveal-row { display: flex; gap: 10px; align-items: center; }
+  #reveal-input { width: 120px !important; font-size: 22px !important; font-weight: 700 !important; padding: 10px !important; }
+
+  .country-list { list-style: none; }
+  .country-row {
+    display: grid; grid-template-columns: 30px 1fr 70px 80px 90px 36px;
+    align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; margin-bottom: 4px; font-size: 14px;
+  }
+  .country-row.is-next { background: rgba(255,215,0,.08); border: 1px solid rgba(255,215,0,.25); }
+  .country-row.eliminated { opacity: .38; }
+  .country-row:not(.eliminated):hover { background: rgba(255,255,255,.03); }
+  .col-pos { color: var(--text-dim); font-size: 12px; text-align: right; }
+  .col-name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .col-jury { text-align: center; color: var(--text-dim); font-size: 13px; }
+  .col-tv { text-align: center; font-weight: 700; }
+  .col-total { text-align: center; font-weight: 800; font-size: 15px; }
+  .col-icon { text-align: center; font-size: 18px; }
+  .tv-revealed { color: var(--gold); }
+  .tv-pending { color: var(--text-dim); font-style: italic; }
+  .total-revealed { color: var(--text); }
+  .total-pending { color: var(--text-dim); font-size: 12px; }
+  .estimates { font-size: 11px; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
+  .estimates em { color: var(--blue); font-style: normal; }
+
+  .winner-banner {
+    text-align: center; padding: 28px;
+    background: linear-gradient(135deg,#1a0a3d,#2a1060);
+    border: 2px solid var(--gold); border-radius: 12px; margin-bottom: 20px;
+    box-shadow: 0 0 40px rgba(255,215,0,.2);
+  }
+  .winner-banner .trophy { font-size: 48px; margin-bottom: 8px; }
+  .winner-banner .winner-name { font-size: 32px; font-weight: 900; color: var(--gold); }
+  .winner-banner .winner-score { font-size: 20px; color: var(--text-dim); margin-top: 4px; }
+
+  /* Leaderboard */
+  .lb-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 12px; }
+  .lb-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .lb-stat { background: var(--bg-input); border-radius: 8px; padding: 10px; text-align: center; }
+  .lb-stat-val { font-size: 22px; font-weight: 800; color: var(--gold); line-height: 1; }
+  .lb-stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .lb-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; margin-bottom: 3px; font-size: 13px; }
+  .lb-row.lb-leader { background: var(--leader-bg); border: 1px solid rgba(255,215,0,.2); }
+  .lb-row.lb-eliminated { opacity: .35; }
+  .lb-rank { width: 22px; text-align: right; font-size: 12px; color: var(--text-dim); font-weight: 700; flex-shrink: 0; }
+  .lb-flag { font-size: 20px; flex-shrink: 0; }
+  .lb-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-score { font-weight: 800; font-size: 15px; flex-shrink: 0; }
+  .lb-score.revealed { color: var(--text); }
+  .lb-score.pending { color: var(--text-dim); font-size: 12px; }
+  .lb-status { flex-shrink: 0; font-size: 16px; }
+
+  .test-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .info-box { background: rgba(77,171,247,.08); border: 1px solid rgba(77,171,247,.25); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--text-dim); margin-bottom: 14px; line-height: 1.6; }
+  .info-box a { color: var(--blue); }
+  .flex-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .mt-16 { margin-top: 16px; }
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-star">✦</span>
+    <div>
+      <div class="logo-text">EUROVISION 2026</div>
+      <div class="logo-sub">Live Voting Tracker · Vienna</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline btn-sm" onclick="loadTest()">Load 2025 Test Data</button>
+    <button class="btn btn-danger btn-sm" onclick="doReset()">↺ Reset</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <div id="main-panel">Loading…</div>
+  <div id="side-panel">
+    <div class="lb-title">⭑ Leaderboard</div>
+    <div id="leaderboard-content"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+
+const COUNTRIES_2026 = [
+  {name:'Albania',        flag:'🇦🇱'},
+  {name:'Australia',      flag:'🇦🇺'},
+  {name:'Austria',        flag:'🇦🇹'},
+  {name:'Belgium',        flag:'🇧🇪'},
+  {name:'Bulgaria',       flag:'🇧🇬'},
+  {name:'Croatia',        flag:'🇭🇷'},
+  {name:'Cyprus',         flag:'🇨🇾'},
+  {name:'Czechia',        flag:'🇨🇿'},
+  {name:'Denmark',        flag:'🇩🇰'},
+  {name:'Finland',        flag:'🇫🇮'},
+  {name:'France',         flag:'🇫🇷'},
+  {name:'Germany',        flag:'🇩🇪'},
+  {name:'Greece',         flag:'🇬🇷'},
+  {name:'Israel',         flag:'🇮🇱'},
+  {name:'Italy',          flag:'🇮🇹'},
+  {name:'Lithuania',      flag:'🇱🇹'},
+  {name:'Malta',          flag:'🇲🇹'},
+  {name:'Moldova',        flag:'🇲🇩'},
+  {name:'Norway',         flag:'🇳🇴'},
+  {name:'Poland',         flag:'🇵🇱'},
+  {name:'Romania',        flag:'🇷🇴'},
+  {name:'Serbia',         flag:'🇷🇸'},
+  {name:'Sweden',         flag:'🇸🇪'},
+  {name:'Ukraine',        flag:'🇺🇦'},
+  {name:'United Kingdom', flag:'🇬🇧'},
+];
+
+// 2025 Basel test data — approximate figures for testing
+// Jury sum = 2,146 (37 blocs × 58) | Televote sum = 2,204 (38 blocs × 58)
+// Winner: Austria (JJ) — 258 jury + 178 televote = 436
+const COUNTRIES_2025 = [
+  {name:'Albania',     flag:'🇦🇱'}, {name:'Armenia',     flag:'🇦🇲'},
+  {name:'Australia',   flag:'🇦🇺'}, {name:'Austria',     flag:'🇦🇹'},
+  {name:'Denmark',     flag:'🇩🇰'}, {name:'Estonia',     flag:'🇪🇪'},
+  {name:'Finland',     flag:'🇫🇮'}, {name:'France',      flag:'🇫🇷'},
+  {name:'Georgia',     flag:'🇬🇪'}, {name:'Germany',     flag:'🇩🇪'},
+  {name:'Greece',      flag:'🇬🇷'}, {name:'Iceland',     flag:'🇮🇸'},
+  {name:'Israel',      flag:'🇮🇱'}, {name:'Italy',       flag:'🇮🇹'},
+  {name:'Latvia',      flag:'🇱🇻'}, {name:'Lithuania',   flag:'🇱🇹'},
+  {name:'Luxembourg',  flag:'🇱🇺'}, {name:'Malta',       flag:'🇲🇹'},
+  {name:'Netherlands', flag:'🇳🇱'}, {name:'Norway',      flag:'🇳🇴'},
+  {name:'Poland',      flag:'🇵🇱'}, {name:'Serbia',      flag:'🇷🇸'},
+  {name:'Spain',       flag:'🇪🇸'}, {name:'Sweden',      flag:'🇸🇪'},
+  {name:'Switzerland', flag:'🇨🇭'}, {name:'Ukraine',     flag:'🇺🇦'},
+];
+
+const JURY_2025 = {
+  Albania:50,  Armenia:32,  Australia:156, Austria:258,
+  Denmark:29,  Estonia:54,  Finland:88,    France:194,
+  Georgia:45,  Germany:13,  Greece:42,     Iceland:24,
+  Israel:101,  Italy:112,   Latvia:37,     Lithuania:72,
+  Luxembourg:50, Malta:63,  Netherlands:21, Norway:173,
+  Poland:40,   Serbia:27,   Spain:19,      Sweden:233,
+  Switzerland:124, Ukraine:89,
+};
+
+const TELEVOTE_2025 = {
+  Albania:184, Armenia:72,  Australia:44,  Austria:178,
+  Denmark:24,  Estonia:54,  Finland:133,   France:42,
+  Georgia:48,  Germany:8,   Greece:121,    Iceland:42,
+  Israel:261,  Italy:32,    Latvia:38,     Lithuania:61,
+  Luxembourg:12, Malta:82,  Netherlands:22, Norway:156,
+  Poland:172,  Serbia:88,   Spain:10,      Sweden:56,
+  Switzerland:36, Ukraine:228,
+};
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+
+function makeDefaultState() {
+  return {
+    phase: 'jury',
+    countries: COUNTRIES_2026.map(c => ({...c})),
+    juryScores: {},          // name → int
+    televoteScores: {},      // name → int (only revealed)
+    revealOrder: [],         // country names, ascending jury score
+    revealIndex: 0,
+    totalJuryBlocs: 35,
+    totalTVBlocs: 36,
+    totalJuryPts: 2030,
+    totalTVPts: 2088,
+    testMode: false,
+  };
+}
+
+let S = makeDefaultState();
+
+// ══════════════════════════════════════════════════════════════
+// LOGIC
+// ══════════════════════════════════════════════════════════════
+
+function computeRevealOrder() {
+  const js = S.juryScores;
+  S.revealOrder = [...S.countries]
+    .sort((a, b) => (js[a.name] || 0) - (js[b.name] || 0) || a.name.localeCompare(b.name))
+    .map(c => c.name);
+}
+
+function enrichedCountries() {
+  const js = S.juryScores;
+  const ts = S.televoteScores;
+  const revealedTotal = Object.values(ts).reduce((a, b) => a + b, 0);
+  const revealedCount = Object.keys(ts).length;
+  const totalCount = S.countries.length;
+  const unrevealed = totalCount - revealedCount;
+  const remainingPool = S.totalTVPts - revealedTotal;
+
+  // Best combined among revealed
+  let bestTotal = 0, bestCountry = null;
+  for (const [name, tv] of Object.entries(ts)) {
+    const combined = (js[name] || 0) + tv;
+    if (combined > bestTotal) { bestTotal = combined; bestCountry = name; }
+  }
+
+  // Trend floor = last revealed country's televote
+  let trendFloor = 0;
+  if (S.revealIndex > 0 && S.revealOrder.length) {
+    trendFloor = ts[S.revealOrder[S.revealIndex - 1]] || 0;
+  }
+
+  const flagMap = Object.fromEntries(S.countries.map(c => [c.name, c.flag]));
+
+  const countries = S.revealOrder.map((name, pos) => {
+    const jury = js[name] || 0;
+    const tv = ts[name];                        // undefined if unrevealed
+    const isRevealed = tv !== undefined;
+    const combined = jury + (isRevealed ? tv : 0);
+    const maxPossible = jury + S.totalTVBlocs * 12;
+
+    let status;
+    if (isRevealed) {
+      status = name === bestCountry ? 'leading' : combined < bestTotal ? 'eliminated' : 'confirmed';
+    } else {
+      status = maxPossible < bestTotal ? 'eliminated' : 'pending';
+    }
+
+    const fairShare = (!isRevealed && unrevealed > 0) ? Math.round(remainingPool / unrevealed) : null;
+
+    return {
+      name, flag: flagMap[name] || '',
+      jury, tv, combined, maxPossible,
+      isRevealed, status, fairShare,
+      trendFloor: isRevealed ? null : trendFloor,
+      pos, isNext: pos === S.revealIndex,
+    };
+  });
+
+  const revealedSorted = countries.filter(c => c.isRevealed).sort((a,b) => b.combined - a.combined);
+  const unrevealedSorted = countries.filter(c => !c.isRevealed).sort((a,b) => b.maxPossible - a.maxPossible);
+
+  return {
+    countries,
+    leaderboard: [...revealedSorted, ...unrevealedSorted],
+    revealedCount, unrevealed, totalCount,
+    revealedTotal, remainingPool,
+    bestTotal, bestCountry, trendFloor,
+    jurySum: Object.values(js).reduce((a,b)=>a+b,0),
+    isComplete: S.phase === 'televote' && revealedCount === totalCount,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════
+
+function render() {
+  const E = enrichedCountries();
+  if (S.phase === 'jury') renderJury(E);
+  else renderTelvote(E);
+  renderLeaderboard(E);
+}
+
+// ── Jury ───────────────────────────────────────────────────────
+function renderJury(E) {
+  const maxPts = S.totalJuryPts;
+  const rows = S.countries.map(c => `
+    <tr>
+      <td><div class="flag-name"><span class="flag">${c.flag}</span>${esc(c.name)}</div></td>
+      <td>
+        <input type="number" class="jury-input" id="ji-${esc(c.name)}"
+          min="0" max="2030" value="${S.juryScores[c.name] || ''}"
+          oninput="updateJuryTotal()" onkeydown="juryKey(event,this)">
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('main-panel').innerHTML = `
+    <div class="phase-badge">⦿ Phase 1 — Jury Scores</div>
+
+    <div class="info-box">
+      💡 After the jury round ends, find the jury totals on
+      <a href="https://eurovision.tv" target="_blank">eurovision.tv</a>,
+      <a href="https://eurovisionworld.com/eurovision/2026" target="_blank">eurovisionworld.com</a>
+      or <a href="https://esctoday.com" target="_blank">esctoday.com</a>,
+      then enter each country's total below. Press <strong>Enter</strong> to move between rows.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Enter Jury Totals (35 blocs × 58 pts = 2,030 max)</div>
+      <table class="jury-table">
+        <thead><tr><th>Country</th><th style="width:110px">Jury Score</th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot>
+          <tr class="jury-total-row">
+            <td>Running total</td>
+            <td id="jury-total-cell" style="text-align:center">0 / ${maxPts}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <div class="mt-16 flex-row">
+        <button class="btn btn-gold btn-lg" onclick="confirmJury()">Confirm Jury Scores →</button>
+        <span style="font-size:13px;color:var(--text-dim)">Sets the televote reveal order</span>
+      </div>
+    </div>`;
+
+  updateJuryTotal();
+  // Focus first empty input
+  for (const inp of document.querySelectorAll('.jury-input')) {
+    if (!inp.value) { inp.focus(); break; }
+  }
+}
+
+function updateJuryTotal() {
+  let total = 0;
+  document.querySelectorAll('.jury-input').forEach(i => { total += parseInt(i.value) || 0; });
+  const cell = document.getElementById('jury-total-cell');
+  if (!cell) return;
+  const max = S.totalJuryPts;
+  const cls = total > max ? 'total-over' : total === max ? 'total-ok' : 'total-warn';
+  cell.innerHTML = `<span class="${cls}">${total}</span> / ${max}`;
+}
+
+function juryKey(e, inp) {
+  if (e.key !== 'Enter') return;
+  const inputs = [...document.querySelectorAll('.jury-input')];
+  const i = inputs.indexOf(inp);
+  if (i < inputs.length - 1) inputs[i + 1].focus();
+  else confirmJury();
+}
+
+function confirmJury() {
+  S.countries.forEach(c => {
+    const inp = document.getElementById('ji-' + esc(c.name));
+    S.juryScores[c.name] = inp ? (parseInt(inp.value) || 0) : 0;
+  });
+  S.phase = 'televote';
+  S.televoteScores = {};
+  S.revealIndex = 0;
+  computeRevealOrder();
+  render();
+}
+
+// ── Televote ───────────────────────────────────────────────────
+function renderTelvote(E) {
+  const { countries, revealedCount, totalCount, remainingPool, bestCountry, bestTotal, isComplete } = E;
+  const pct = totalCount > 0 ? (revealedCount / totalCount * 100).toFixed(1) : 0;
+  const next = countries.find(c => c.isNext);
+
+  let html = '';
+  if (S.testMode) html += `<div class="test-badge">🧪 Test Mode — Eurovision 2025 Basel (approximate data)</div>`;
+  html += `<div class="phase-badge">⦿ Phase 2 — Televote Reveal</div>`;
+
+  // Winner banner
+  if (isComplete) {
+    const w = countries.find(c => c.status === 'leading');
+    if (w) html += `
+      <div class="winner-banner">
+        <div class="trophy">🏆</div>
+        <div class="winner-name">${w.flag} ${esc(w.name)}</div>
+        <div class="winner-score">${w.combined} pts · Jury ${w.jury} + Televote ${w.tv}</div>
+      </div>`;
+  }
+
+  // Progress
+  html += `
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" style="width:${pct}%"></div>
+    </div>
+    <div class="progress-label">
+      <span>${revealedCount} of ${totalCount} televotes revealed</span>
+      <span>${remainingPool} pts remaining in pool</span>
+    </div>`;
+
+  // Next-up card
+  if (!isComplete && next) {
+    html += `
+      <div class="next-card">
+        <div class="next-label">Next to Reveal</div>
+        <div class="next-country">
+          <span class="next-flag">${next.flag}</span>
+          <div>
+            <div class="next-name">${esc(next.name)}</div>
+            <div class="next-jury">Jury: <strong>${next.jury}</strong> pts &nbsp;·&nbsp; Max possible total: <strong>${next.maxPossible}</strong></div>
+            ${next.fairShare !== null ? `
+            <div class="next-jury" style="margin-top:4px">
+              Fair-share estimate: ~<strong>${next.fairShare}</strong> pts
+              ${next.trendFloor ? ` &nbsp;·&nbsp; Trend floor ≥<strong>${next.trendFloor}</strong>` : ''}
+            </div>` : ''}
+          </div>
+        </div>
+        <div class="reveal-row">
+          <input type="number" id="reveal-input" min="0" max="2204" placeholder="Score"
+            onkeydown="if(event.key==='Enter') doReveal()">
+          <button class="btn btn-gold btn-lg" onclick="doReveal()">Reveal ⟶</button>
+        </div>
+        ${S.testMode ? `
+        <div class="test-controls">
+          <button class="btn btn-blue btn-sm" onclick="testRevealNext()">▶ Auto-reveal next (${esc(next.name)})</button>
+          <button class="btn btn-outline btn-sm" onclick="testRevealAll()">⏩ Auto-reveal all</button>
+        </div>` : ''}
+      </div>`;
+  } else if (isComplete && S.testMode) {
+    html += `<div class="card" style="text-align:center;padding:16px;color:var(--text-dim)">All ${totalCount} countries revealed.</div>`;
+  }
+
+  // Country list
+  html += `<ul class="country-list">`;
+  countries.forEach((c, i) => {
+    const cls = [c.isNext?'is-next':'', c.isRevealed?'revealed':'', c.status==='eliminated'?'eliminated':''].filter(Boolean).join(' ');
+    const icon = {leading:'🏆', eliminated:'❌', pending:'⏳', confirmed:'✅'}[c.status] || '⬜';
+    const tvCell = c.isRevealed ? `<span class="tv-revealed">${c.tv}</span>` : `<span class="tv-pending">—</span>`;
+    const totalCell = c.isRevealed ? `<span class="total-revealed">${c.combined}</span>` : `<span class="total-pending">≤${c.maxPossible}</span>`;
+    const est = (!c.isRevealed && c.fairShare !== null)
+      ? `<div class="estimates">~<em>${c.fairShare}</em> fair-share${c.trendFloor ? ` · ≥<em>${c.trendFloor}</em> trend` : ''}</div>`
+      : '';
+    html += `
+      <li class="country-row ${cls}">
+        <span class="col-pos">${i+1}</span>
+        <span class="col-name"><span class="flag">${c.flag}</span><span>${esc(c.name)}${est}</span></span>
+        <span class="col-jury">${c.jury}</span>
+        <span class="col-tv">${tvCell}</span>
+        <span class="col-total">${totalCell}</span>
+        <span class="col-icon">${icon}</span>
+      </li>`;
+  });
+  html += `</ul>`;
+
+  document.getElementById('main-panel').innerHTML = html;
+  const ri = document.getElementById('reveal-input');
+  if (ri) ri.focus();
+}
+
+// ── Leaderboard ────────────────────────────────────────────────
+function renderLeaderboard(E) {
+  const el = document.getElementById('leaderboard-content');
+  if (S.phase === 'jury') {
+    el.innerHTML = `<p style="color:var(--text-dim);font-size:13px;padding:10px 0">Leaderboard opens after jury scores are confirmed.</p>`;
+    return;
+  }
+  const { leaderboard, revealedCount, totalCount, remainingPool, bestCountry, bestTotal } = E;
+
+  let html = `
+    <div class="lb-stats">
+      <div class="lb-stat"><div class="lb-stat-val">${revealedCount}/${totalCount}</div><div class="lb-stat-label">Revealed</div></div>
+      <div class="lb-stat"><div class="lb-stat-val">${remainingPool}</div><div class="lb-stat-label">Pool Left</div></div>
+    </div>`;
+
+  if (bestCountry) {
+    const flag = (S.countries.find(c=>c.name===bestCountry)||{}).flag||'';
+    html += `<div style="text-align:center;padding:6px 0 12px;font-size:13px;color:var(--text-dim)">
+      Leader: <strong style="color:var(--gold)">${flag} ${esc(bestCountry)}</strong>
+      <span style="color:var(--text)"> ${bestTotal} pts</span></div>`;
+  }
+
+  let rank = 0, lastScore = -1;
+  leaderboard.forEach(c => {
+    if (c.isRevealed && c.combined !== lastScore) { rank++; lastScore = c.combined; }
+    const cls = c.status==='leading' ? 'lb-leader' : c.status==='eliminated' ? 'lb-eliminated' : '';
+    const icon = {leading:'🏆', eliminated:'❌', pending:'⏳', confirmed:'✅'}[c.status]||'';
+    const score = c.isRevealed
+      ? `<span class="lb-score revealed">${c.combined}</span>`
+      : `<span class="lb-score pending">≤${c.maxPossible}</span>`;
+    html += `
+      <div class="lb-row ${cls}">
+        <span class="lb-rank">${c.isRevealed ? rank : '—'}</span>
+        <span class="lb-flag">${c.flag}</span>
+        <span class="lb-name">${esc(c.name)}</span>
+        ${score}
+        <span class="lb-status">${icon}</span>
+      </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════════════════════
+
+function doReveal() {
+  const inp = document.getElementById('reveal-input');
+  if (!inp || S.revealIndex >= S.revealOrder.length) return;
+  const score = parseInt(inp.value) || 0;
+  inp.value = '';
+  const name = S.revealOrder[S.revealIndex];
+  S.televoteScores[name] = score;
+  S.revealIndex++;
+  render();
+}
+
+function testRevealNext() {
+  if (S.revealIndex >= S.revealOrder.length) return;
+  const name = S.revealOrder[S.revealIndex];
+  S.televoteScores[name] = TELEVOTE_2025[name] || 0;
+  S.revealIndex++;
+  render();
+}
+
+function testRevealAll() {
+  S.revealOrder.slice(S.revealIndex).forEach(name => {
+    S.televoteScores[name] = TELEVOTE_2025[name] || 0;
+  });
+  S.revealIndex = S.revealOrder.length;
+  render();
+}
+
+function loadTest() {
+  if (!confirm('Load 2025 test data? This resets current state.')) return;
+  S = makeDefaultState();
+  S.countries = COUNTRIES_2025.map(c=>({...c}));
+  S.juryScores = {...JURY_2025};
+  S.totalJuryBlocs = 37;
+  S.totalTVBlocs = 38;
+  S.totalJuryPts = 2146;
+  S.totalTVPts = 2204;
+  S.phase = 'televote';
+  S.testMode = true;
+  computeRevealOrder();
+  render();
+}
+
+function doReset() {
+  if (!confirm('Reset everything and return to live 2026 mode?')) return;
+  S = makeDefaultState();
+  render();
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTIL
+// ══════════════════════════════════════════════════════════════
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ───────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
