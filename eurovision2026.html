@@ -346,11 +346,26 @@ function enrichedCountries() {
     const combined = jury + (isRevealed ? tv : 0);
     const maxPossible = jury + S.totalTVBlocs * 12;
 
+    // When this is the last unrevealed country, they receive the entire remaining pool
+    const isLastUnrevealed = !isRevealed && unrevealed === 1;
+    const guaranteedTV = isLastUnrevealed ? remainingPool : null;
+    const guaranteedTotal = isLastUnrevealed ? jury + remainingPool : null;
+    const isGuaranteedWinner = isLastUnrevealed && guaranteedTotal > bestTotal;
+
+    // How many televote pts this country needs to beat the current leader
+    const neededToLead = !isRevealed ? Math.max(0, bestTotal + 1 - jury) : null;
+    // Can they reach it?
+    const canReachLead = neededToLead !== null && (maxPossible - jury) >= neededToLead;
+
     let status;
     if (isRevealed) {
       status = name === bestCountry ? 'leading' : combined < bestTotal ? 'eliminated' : 'confirmed';
+    } else if (isGuaranteedWinner) {
+      status = 'guaranteed';
+    } else if (maxPossible < bestTotal) {
+      status = 'eliminated';
     } else {
-      status = maxPossible < bestTotal ? 'eliminated' : 'pending';
+      status = 'pending';
     }
 
     const fairShare = (!isRevealed && unrevealed > 0) ? Math.round(remainingPool / unrevealed) : null;
@@ -360,6 +375,8 @@ function enrichedCountries() {
       jury, tv, combined, maxPossible,
       isRevealed, status, fairShare,
       trendFloor: isRevealed ? null : trendFloor,
+      neededToLead, canReachLead,
+      guaranteedTV, guaranteedTotal, isGuaranteedWinner,
       pos, isNext: pos === S.revealIndex,
     };
   });
@@ -478,7 +495,8 @@ function renderTelvote(E) {
   if (S.testMode) html += `<div class="test-badge">🧪 Test Mode — Eurovision 2025 Basel (approximate data)</div>`;
   html += `<div class="phase-badge">⦿ Phase 2 — Televote Reveal</div>`;
 
-  // Winner banner
+  // Winner banner — shown when complete OR when a win is mathematically guaranteed
+  const guaranteedW = countries.find(c => c.status === 'guaranteed');
   if (isComplete) {
     const w = countries.find(c => c.status === 'leading');
     if (w) html += `
@@ -486,6 +504,15 @@ function renderTelvote(E) {
         <div class="trophy">🏆</div>
         <div class="winner-name">${w.flag} ${esc(w.name)}</div>
         <div class="winner-score">${w.combined} pts · Jury ${w.jury} + Televote ${w.tv}</div>
+      </div>`;
+  } else if (guaranteedW) {
+    html += `
+      <div class="winner-banner">
+        <div class="trophy">🏆</div>
+        <div class="winner-name">${guaranteedW.flag} ${esc(guaranteedW.name)}</div>
+        <div class="winner-score" style="color:var(--green)">
+          Guaranteed winner! · Jury ${guaranteedW.jury} + at least ${guaranteedW.guaranteedTV} televote = ${guaranteedW.guaranteedTotal} pts
+        </div>
       </div>`;
   }
 
@@ -509,9 +536,16 @@ function renderTelvote(E) {
           <div>
             <div class="next-name">${esc(next.name)}</div>
             <div class="next-jury">Jury: <strong>${next.jury}</strong> pts &nbsp;·&nbsp; Max possible total: <strong>${next.maxPossible}</strong></div>
-            ${next.fairShare !== null ? `
+            ${next.neededToLead !== null ? `
             <div class="next-jury" style="margin-top:4px">
-              Fair-share estimate: ~<strong>${next.fairShare}</strong> pts
+              ${next.neededToLead === 0
+                ? `<span style="color:var(--green)">✓ Already leads — any score keeps them ahead</span>`
+                : `Needs <strong style="color:${next.canReachLead ? 'var(--gold)' : 'var(--red)'}">${next.neededToLead} pts</strong> televote to take the lead`}
+              ${next.isGuaranteedWinner ? `&nbsp;·&nbsp;<span style="color:var(--green)">🏆 Guaranteed winner (gets all ${next.guaranteedTV} remaining pts)</span>` : ''}
+            </div>` : ''}
+            ${next.fairShare !== null ? `
+            <div class="next-jury" style="margin-top:2px;font-size:13px">
+              Fair-share: ~<strong>${next.fairShare}</strong> pts
               ${next.trendFloor ? ` &nbsp;·&nbsp; Trend floor ≥<strong>${next.trendFloor}</strong>` : ''}
             </div>` : ''}
           </div>
@@ -535,12 +569,20 @@ function renderTelvote(E) {
   html += `<ul class="country-list">`;
   countries.forEach((c, i) => {
     const cls = [c.isNext?'is-next':'', c.isRevealed?'revealed':'', c.status==='eliminated'?'eliminated':''].filter(Boolean).join(' ');
-    const icon = {leading:'🏆', eliminated:'❌', pending:'⏳', confirmed:'✅'}[c.status] || '⬜';
+    const icon = {leading:'🏆', guaranteed:'🏆', eliminated:'❌', pending:'⏳', confirmed:'✅'}[c.status] || '⬜';
     const tvCell = c.isRevealed ? `<span class="tv-revealed">${c.tv}</span>` : `<span class="tv-pending">—</span>`;
     const totalCell = c.isRevealed ? `<span class="total-revealed">${c.combined}</span>` : `<span class="total-pending">≤${c.maxPossible}</span>`;
-    const est = (!c.isRevealed && c.fairShare !== null)
-      ? `<div class="estimates">~<em>${c.fairShare}</em> fair-share${c.trendFloor ? ` · ≥<em>${c.trendFloor}</em> trend` : ''}</div>`
-      : '';
+    let est = '';
+    if (!c.isRevealed && c.status !== 'eliminated') {
+      const needsPart = c.neededToLead === 0
+        ? `<em style="color:var(--green)">leads now</em>`
+        : c.neededToLead !== null
+          ? `needs <em style="color:${c.canReachLead ? 'var(--blue)' : 'var(--red)'}">${c.neededToLead}</em> to lead`
+          : '';
+      const fairPart = c.fairShare !== null ? `~<em>${c.fairShare}</em> est` : '';
+      const parts = [needsPart, fairPart].filter(Boolean).join(' · ');
+      if (parts) est = `<div class="estimates">${parts}</div>`;
+    }
     html += `
       <li class="country-row ${cls}">
         <span class="col-pos">${i+1}</span>
@@ -583,8 +625,8 @@ function renderLeaderboard(E) {
   let rank = 0, lastScore = -1;
   leaderboard.forEach(c => {
     if (c.isRevealed && c.combined !== lastScore) { rank++; lastScore = c.combined; }
-    const cls = c.status==='leading' ? 'lb-leader' : c.status==='eliminated' ? 'lb-eliminated' : '';
-    const icon = {leading:'🏆', eliminated:'❌', pending:'⏳', confirmed:'✅'}[c.status]||'';
+    const cls = (c.status==='leading'||c.status==='guaranteed') ? 'lb-leader' : c.status==='eliminated' ? 'lb-eliminated' : '';
+    const icon = {leading:'🏆', guaranteed:'🏆', eliminated:'❌', pending:'⏳', confirmed:'✅'}[c.status]||'';
     const score = c.isRevealed
       ? `<span class="lb-score revealed">${c.combined}</span>`
       : `<span class="lb-score pending">≤${c.maxPossible}</span>`;
