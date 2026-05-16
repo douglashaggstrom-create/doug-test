@@ -207,6 +207,7 @@ def compute_enriched_state():
     return {
         'phase': snap['phase'],
         'countries': country_data,
+        'raw_countries': [{'name': c['name'], 'flag': c['flag']} for c in countries],
         'leaderboard': revealed_sorted + unrevealed_sorted,
         'reveal_order': reveal_order,
         'current_reveal_index': current_idx,

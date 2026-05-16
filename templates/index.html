@@ -239,7 +239,7 @@ function render() {
 
 // ── Jury phase ─────────────────────────────────────────────────
 function renderJury() {
-  const countries = S.countries || [];
+  const countries = S.raw_countries || [];
   const juryRaw = S.jury_scores_raw || {};
   const maxPts = S.total_jury_points || 2030;
   const scrapeStatus = S.scrape_status || 'idle';
@@ -325,7 +325,7 @@ function juryKey(e, inp) {
 
 async function confirmJury() {
   const scores = {};
-  (S.countries || []).forEach(c => {
+  (S.raw_countries || []).forEach(c => {
     const inp = document.getElementById('ji-' + slugify(c.name));
     scores[c.name] = inp ? (parseInt(inp.value)||0) : 0;
   });
