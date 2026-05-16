@@ -12,7 +12,7 @@
     --border:    #2d1a5e;
     --gold:      #ffd700;
     --gold-dim:  #a88a00;
-    --gold-glow: rgba(255,215,0,.18);
+    --gold-glow: rgba(255,215,0,.15);
     --text:      #ede6ff;
     --text-dim:  #8870bb;
     --green:     #00e87a;
@@ -20,544 +20,155 @@
     --blue:      #4dabf7;
     --leader-bg: rgba(255,215,0,.08);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── Header ─────────────────────────────────────────── */
   header {
     background: linear-gradient(135deg, #12043a 0%, #1a0650 50%, #12043a 100%);
     border-bottom: 2px solid var(--gold-dim);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 24px rgba(0,0,0,.6);
+    padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 24px rgba(0,0,0,.6); position: sticky; top: 0; z-index: 10;
   }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
+  .logo { display: flex; align-items: center; gap: 12px; }
   .logo-star { font-size: 28px; }
-
   .logo-text {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 1px;
+    font-size: 22px; font-weight: 800; letter-spacing: 1px;
     background: linear-gradient(90deg, #ffd700, #ffec6e, #ffd700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
+  .logo-sub { font-size: 12px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+  .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
-  .logo-sub {
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 1px;
-  }
+  .app-layout { display: grid; grid-template-columns: 1fr 360px; height: calc(100vh - 70px); }
+  #main-panel { padding: 20px 24px; overflow-y: auto; border-right: 1px solid var(--border); }
+  #side-panel { padding: 16px; overflow-y: auto; background: var(--bg-card); }
 
-  .header-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  /* ── Layout ─────────────────────────────────────────── */
-  .app-layout {
-    display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 0;
-    height: calc(100vh - 70px);
-  }
-
-  #main-panel {
-    padding: 20px 24px;
-    overflow-y: auto;
-    border-right: 1px solid var(--border);
-  }
-
-  #side-panel {
-    padding: 16px;
-    overflow-y: auto;
-    background: var(--bg-card);
-  }
-
-  /* ── Buttons ─────────────────────────────────────────── */
-  .btn {
-    padding: 9px 18px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .15s;
-    white-space: nowrap;
-  }
-
+  .btn { padding: 9px 18px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
   .btn:active { transform: scale(.97); }
-
-  .btn-gold {
-    background: linear-gradient(135deg, #c8960a, #ffd700, #c8960a);
-    color: #1a0a00;
-  }
+  .btn-gold { background: linear-gradient(135deg,#c8960a,#ffd700,#c8960a); color: #1a0a00; }
   .btn-gold:hover { filter: brightness(1.12); }
-
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-  }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
   .btn-outline:hover { border-color: var(--gold-dim); color: var(--gold); }
-
-  .btn-danger {
-    background: transparent;
-    border: 1px solid #5a1a2a;
-    color: #ff6688;
-  }
+  .btn-danger { background: transparent; border: 1px solid #5a1a2a; color: #ff6688; }
   .btn-danger:hover { background: rgba(255,51,102,.12); }
-
-  .btn-green {
-    background: linear-gradient(135deg, #00884a, #00e87a);
-    color: #001a0a;
-  }
-  .btn-green:hover { filter: brightness(1.1); }
-
-  .btn-blue {
-    background: rgba(77,171,247,.15);
-    border: 1px solid #2d6ea0;
-    color: var(--blue);
-  }
+  .btn-blue { background: rgba(77,171,247,.15); border: 1px solid #2d6ea0; color: var(--blue); }
   .btn-blue:hover { background: rgba(77,171,247,.25); }
-
   .btn-sm { padding: 6px 12px; font-size: 13px; }
   .btn-lg { padding: 13px 28px; font-size: 16px; font-weight: 700; }
   .btn:disabled { opacity: .4; cursor: not-allowed; }
 
-  /* ── Cards ───────────────────────────────────────────── */
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
-    margin-bottom: 16px;
-  }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+  .card-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 14px; }
 
-  .card-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 14px;
-  }
+  input[type=number] { background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 16px; padding: 8px 12px; outline: none; transition: border-color .15s; width: 100%; text-align: center; }
+  input[type=number]:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 2px var(--gold-glow); }
 
-  /* ── Inputs ──────────────────────────────────────────── */
-  input[type=number], input[type=text] {
-    background: var(--bg-input);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    font-size: 16px;
-    padding: 8px 12px;
-    outline: none;
-    transition: border-color .15s;
-    width: 100%;
-  }
+  .phase-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-glow); border: 1px solid var(--gold-dim); border-radius: 20px; padding: 3px 12px; font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 18px; }
+  .test-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(77,171,247,.1); border: 1px solid rgba(77,171,247,.3); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--blue); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
 
-  input[type=number]:focus, input[type=text]:focus {
-    border-color: var(--gold-dim);
-    box-shadow: 0 0 0 2px var(--gold-glow);
-  }
+  /* Scraper status bar */
+  .scraper-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+  .scraper-bar.scanning { background: rgba(77,171,247,.08); border: 1px solid rgba(77,171,247,.2); color: var(--text-dim); }
+  .scraper-bar.found    { background: rgba(0,232,122,.08); border: 1px solid rgba(0,232,122,.3); color: var(--green); }
+  .scraper-bar.failed   { background: rgba(255,51,102,.08); border: 1px solid rgba(255,51,102,.2); color: #ff8899; }
+  .scraper-bar.idle     { display: none; }
+  .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+  .pulse.scanning { animation: pulseAnim 1.2s ease-in-out infinite; }
+  .pulse.found    { background: var(--green); }
+  .pulse.failed   { background: var(--red); }
+  @keyframes pulseAnim { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
 
-  input[type=number] { text-align: center; }
-
-  /* ── Phase badge ─────────────────────────────────────── */
-  .phase-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--gold-glow);
-    border: 1px solid var(--gold-dim);
-    border-radius: 20px;
-    padding: 3px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--gold);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 18px;
-  }
-
-  /* ── Jury table ──────────────────────────────────────── */
-  .jury-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 15px;
-  }
-
-  .jury-table th {
-    text-align: left;
-    color: var(--text-dim);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .jury-table td {
-    padding: 6px 10px;
-    border-bottom: 1px solid rgba(45,26,94,.5);
-    vertical-align: middle;
-  }
-
+  /* Jury table */
+  .jury-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .jury-table th { text-align: left; color: var(--text-dim); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .jury-table td { padding: 6px 10px; border-bottom: 1px solid rgba(45,26,94,.5); vertical-align: middle; }
   .jury-table tr:hover td { background: rgba(255,215,0,.03); }
-
-  .flag-name {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 16px;
-  }
-
+  .flag-name { display: flex; align-items: center; gap: 10px; font-size: 16px; }
   .flag { font-size: 22px; line-height: 1; }
+  .jury-input { width: 90px !important; font-size: 15px !important; padding: 6px 8px !important; }
+  .jury-total-row { background: var(--bg-input); border-top: 2px solid var(--border) !important; }
+  .jury-total-row td { padding: 12px 10px; font-weight: 700; font-size: 16px; border-bottom: none !important; }
+  .total-ok { color: var(--green); } .total-warn { color: var(--gold); } .total-over { color: var(--red); }
 
-  .jury-input {
-    width: 90px !important;
-    font-size: 15px !important;
-    padding: 6px 8px !important;
-  }
-
-  .jury-total-row {
-    background: var(--bg-input);
-    border-top: 2px solid var(--border) !important;
-  }
-
-  .jury-total-row td {
-    padding: 12px 10px;
-    font-weight: 700;
-    font-size: 16px;
-    border-bottom: none !important;
-  }
-
-  .total-ok   { color: var(--green); }
-  .total-warn { color: var(--gold); }
-  .total-over { color: var(--red); }
-
-  /* ── Fetch status ────────────────────────────────────── */
-  .fetch-status {
-    padding: 10px 14px;
-    border-radius: 6px;
-    font-size: 14px;
-    margin-bottom: 14px;
-  }
-  .fetch-ok  { background: rgba(0,232,122,.1); border: 1px solid #00884a; color: var(--green); }
-  .fetch-err { background: rgba(255,51,102,.1); border: 1px solid #882233; color: #ff8899; }
-
-  /* ── Televote tracker ────────────────────────────────── */
-  .progress-bar-wrap {
-    background: var(--bg-input);
-    border-radius: 8px;
-    height: 8px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #ffa500, #ffd700);
-    border-radius: 8px;
-    transition: width .4s ease;
-  }
-
-  .progress-label {
-    font-size: 13px;
-    color: var(--text-dim);
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-
+  /* Televote */
+  .progress-bar-wrap { background: var(--bg-input); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg,#ffa500,#ffd700); border-radius: 8px; transition: width .4s ease; }
+  .progress-label { font-size: 13px; color: var(--text-dim); display: flex; justify-content: space-between; margin-bottom: 16px; }
   .progress-label span { color: var(--gold); font-weight: 700; }
 
-  /* ── Next reveal card ────────────────────────────────── */
-  .next-card {
-    background: linear-gradient(135deg, #1a0a3d 0%, #2a1060 100%);
-    border: 2px solid var(--gold-dim);
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 30px rgba(255,215,0,.1);
-  }
-
-  .next-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 8px;
-  }
-
-  .next-country {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 16px;
-  }
-
+  .next-card { background: linear-gradient(135deg,#1a0a3d 0%,#2a1060 100%); border: 2px solid var(--gold-dim); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,215,0,.1); }
+  .next-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 8px; }
+  .next-country { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
   .next-flag { font-size: 42px; line-height: 1; }
-
-  .next-name {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--text);
-  }
-
-  .next-jury {
-    font-size: 15px;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-
+  .next-name { font-size: 28px; font-weight: 800; color: var(--text); }
+  .next-jury { font-size: 15px; color: var(--text-dim); margin-top: 2px; }
   .next-jury strong { color: var(--gold); }
+  .reveal-row { display: flex; gap: 10px; align-items: center; }
+  #reveal-input { width: 120px !important; font-size: 22px !important; font-weight: 700 !important; padding: 10px !important; }
 
-  .reveal-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  #reveal-input {
-    width: 120px !important;
-    font-size: 22px !important;
-    font-weight: 700 !important;
-    padding: 10px !important;
-    text-align: center !important;
-  }
-
-  /* ── Country list (televote) ─────────────────────────── */
+  /* Unrevealed country list */
   .country-list { list-style: none; }
-
-  .country-row {
-    display: grid;
-    grid-template-columns: 30px 1fr 70px 80px 80px 36px;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border-radius: 7px;
-    margin-bottom: 4px;
-    font-size: 14px;
-    transition: background .1s;
-  }
-
-  .country-row.is-next {
-    background: rgba(255,215,0,.08);
-    border: 1px solid rgba(255,215,0,.25);
-  }
-
-  .country-row.revealed { opacity: .85; }
-  .country-row.eliminated { opacity: .4; }
-
+  .country-row { display: grid; grid-template-columns: 26px 1fr 56px 120px 80px 30px; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 7px; margin-bottom: 4px; font-size: 14px; }
+  .country-row.is-next { background: rgba(255,215,0,.08); border: 1px solid rgba(255,215,0,.25); }
+  .country-row.eliminated { opacity: .38; }
   .country-row:not(.eliminated):hover { background: rgba(255,255,255,.03); }
+  .col-pos { color: var(--text-dim); font-size: 12px; text-align: right; }
+  .col-name { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .col-jury { text-align: center; color: var(--text-dim); font-size: 13px; }
+  .col-needs { text-align: center; }
+  .col-max { text-align: center; color: var(--text-dim); font-size: 13px; }
+  .col-icon { text-align: center; font-size: 18px; }
 
-  .col-pos   { color: var(--text-dim); font-size: 12px; text-align: right; }
-  .col-name  { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-  .col-jury  { text-align: center; color: var(--text-dim); font-size: 13px; }
-  .col-tv    { text-align: center; font-weight: 700; }
-  .col-total { text-align: center; font-weight: 800; font-size: 15px; }
-  .col-icon  { text-align: center; font-size: 18px; }
+  .needs-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .needs-badge.reachable   { background: rgba(255,215,0,.12); border: 1px solid rgba(255,215,0,.35); color: var(--gold); }
+  .needs-badge.unreachable { background: rgba(255,51,102,.08); border: 1px solid rgba(255,51,102,.25); color: var(--red); }
+  .needs-badge.leading     { background: rgba(0,232,122,.1);  border: 1px solid rgba(0,232,122,.3); color: var(--green); }
+  .needs-badge.guaranteed  { background: rgba(0,232,122,.12); border: 1px solid var(--green); color: var(--green); }
 
-  .tv-revealed { color: var(--gold); }
-  .tv-pending  { color: var(--text-dim); font-style: italic; }
-
-  .total-revealed { color: var(--text); }
-  .total-pending  { color: var(--text-dim); font-size: 12px; }
-
-  .estimates {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 2px;
-    line-height: 1.4;
-  }
-
+  .list-header { display: grid; grid-template-columns: 26px 1fr 56px 120px 80px 30px; gap: 8px; padding: 4px 10px 6px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+  .estimates { font-size: 11px; color: var(--text-dim); margin-top: 2px; line-height: 1.4; }
   .estimates em { color: var(--blue); font-style: normal; }
 
-  /* ── Complete banner ─────────────────────────────────── */
-  .winner-banner {
-    text-align: center;
-    padding: 28px;
-    background: linear-gradient(135deg, #1a0a3d, #2a1060);
-    border: 2px solid var(--gold);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 40px rgba(255,215,0,.2);
-  }
+  /* Flash animations */
+  @keyframes bannerFlash { 0%{box-shadow:0 0 80px rgba(255,215,0,.9),0 0 0 4px rgba(255,215,0,.6)} 40%{box-shadow:0 0 60px rgba(255,215,0,.6),0 0 0 2px rgba(255,215,0,.3)} 100%{box-shadow:0 0 40px rgba(255,215,0,.2)} }
+  @keyframes rowFlash    { 0%{background:rgba(255,215,0,.45)} 100%{background:var(--leader-bg)} }
+  .flash-banner { animation: bannerFlash 1.4s ease-out; }
+  .flash-row    { animation: rowFlash 1s ease-out; }
 
+  .winner-banner { text-align: center; padding: 28px; background: linear-gradient(135deg,#1a0a3d,#2a1060); border: 2px solid var(--gold); border-radius: 12px; margin-bottom: 20px; box-shadow: 0 0 40px rgba(255,215,0,.2); }
   .winner-banner .trophy { font-size: 48px; margin-bottom: 8px; }
   .winner-banner .winner-name { font-size: 32px; font-weight: 900; color: var(--gold); }
   .winner-banner .winner-score { font-size: 20px; color: var(--text-dim); margin-top: 4px; }
 
-  /* ── Leaderboard ─────────────────────────────────────── */
-  .lb-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold-dim);
-    margin-bottom: 12px;
-  }
-
-  .lb-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
-  .lb-stat {
-    background: var(--bg-input);
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-  }
-
-  .lb-stat-val {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--gold);
-    line-height: 1;
-  }
-
-  .lb-stat-label {
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 2px;
-  }
-
-  .lb-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 8px;
-    border-radius: 7px;
-    margin-bottom: 3px;
-    font-size: 13px;
-  }
-
-  .lb-row.lb-leader {
-    background: var(--leader-bg);
-    border: 1px solid rgba(255,215,0,.2);
-  }
-
+  /* Leaderboard */
+  .lb-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 12px; }
+  .lb-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .lb-stat { background: var(--bg-input); border-radius: 8px; padding: 10px; text-align: center; }
+  .lb-stat-val { font-size: 22px; font-weight: 800; color: var(--gold); line-height: 1; }
+  .lb-stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .lb-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; margin-bottom: 3px; font-size: 13px; }
+  .lb-row.lb-leader { background: var(--leader-bg); border: 1px solid rgba(255,215,0,.2); }
   .lb-row.lb-eliminated { opacity: .35; }
-
-  .lb-rank {
-    width: 22px;
-    text-align: right;
-    font-size: 12px;
-    color: var(--text-dim);
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
+  .lb-rank { width: 22px; text-align: right; font-size: 12px; color: var(--text-dim); font-weight: 700; flex-shrink: 0; }
   .lb-flag { font-size: 20px; flex-shrink: 0; }
-
-  .lb-name {
-    flex: 1;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .lb-score {
-    font-weight: 800;
-    font-size: 15px;
-    flex-shrink: 0;
-  }
-
-  .lb-score.revealed { color: var(--text); }
-  .lb-score.pending  { color: var(--text-dim); font-size: 12px; }
-
+  .lb-name { flex: 1; font-weight: 600; overflow: hidden; min-width: 0; }
+  .lb-name-main { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-split { font-size: 11px; color: var(--text-dim); font-weight: 400; white-space: nowrap; }
+  .lb-split .jury-part { color: #a0c4ff; } .lb-split .tv-part { color: #ffc078; }
+  .lb-score-wrap { text-align: right; flex-shrink: 0; }
+  .lb-score { font-weight: 800; font-size: 15px; display: block; }
+  .lb-score.revealed { color: var(--text); } .lb-score.pending { color: var(--text-dim); font-size: 12px; }
+  .lb-behind { font-size: 11px; color: var(--text-dim); display: block; }
   .lb-status { flex-shrink: 0; font-size: 16px; }
 
-  /* ── Test mode controls ──────────────────────────────── */
-  .test-controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
+  .test-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .flex-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .mt-16 { margin-top: 16px; }
 
-  .test-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(77,171,247,.1);
-    border: 1px solid rgba(77,171,247,.3);
-    border-radius: 20px;
-    padding: 3px 10px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--blue);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  /* ── Done message ────────────────────────────────────── */
-  .all-done-note {
-    text-align: center;
-    color: var(--text-dim);
-    font-size: 14px;
-    padding: 12px;
-  }
-
-  /* ── Spinner ─────────────────────────────────────────── */
-  .spinner {
-    display: inline-block;
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,215,0,.2);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    vertical-align: middle;
-    margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── Scrollbar ───────────────────────────────────────── */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
-
-  /* ── Utility ─────────────────────────────────────────── */
-  .flex-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .mt-4  { margin-top: 4px; }
-  .mt-8  { margin-top: 8px; }
-  .mt-12 { margin-top: 12px; }
-  .mt-16 { margin-top: 16px; }
-  .hidden { display: none !important; }
-  hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 </style>
 </head>
 <body>
@@ -585,12 +196,13 @@
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
-let S = {};   // server state
+let S = {};
+let prevLeader = null;
+let pollTimer = null;
 
-// ── API helpers ────────────────────────────────────────────────────────────
-async function api(url, method = 'GET', body = null) {
-  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+// ── API ────────────────────────────────────────────────────────
+async function api(url, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
   if (body !== null) opts.body = JSON.stringify(body);
   const r = await fetch(url, opts);
   return r.json();
@@ -601,95 +213,101 @@ async function refresh() {
   render();
 }
 
-// ── Main render ────────────────────────────────────────────────────────────
-function render() {
-  if (S.phase === 'jury') renderJuryPhase();
-  else renderTelvotePhase();
-  renderLeaderboard();
+// Auto-poll every 5 seconds to pick up scraper updates
+function startPolling() {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    const prev = S;
+    S = await api('/api/state');
+    // Only re-render if something meaningful changed
+    if (S.scrape_status !== prev.scrape_status ||
+        S.revealed_count !== prev.revealed_count ||
+        JSON.stringify(S.jury_scores_raw) !== JSON.stringify(prev.jury_scores_raw)) {
+      render();
+    }
+  }, 5000);
 }
 
-// ── Jury Phase ─────────────────────────────────────────────────────────────
-function renderJuryPhase() {
-  const panel = document.getElementById('main-panel');
+// ── Render ─────────────────────────────────────────────────────
+function render() {
+  const leaderChanged = !!S.best_country && S.best_country !== prevLeader && prevLeader !== null;
+  prevLeader = S.best_country;
+  if (S.phase === 'jury') renderJury();
+  else renderTelvote(leaderChanged);
+  renderLeaderboard(leaderChanged);
+}
 
+// ── Jury phase ─────────────────────────────────────────────────
+function renderJury() {
   const countries = S.countries || [];
   const juryRaw = S.jury_scores_raw || {};
-  const flags = S.country_flags || {};
   const maxPts = S.total_jury_points || 2030;
+  const scrapeStatus = S.scrape_status || 'idle';
+  const scrapeMsg = S.scrape_message || '';
 
-  let rows = countries.map(c => {
-    const name = c.name;
-    const flag = c.flag || flags[name] || '';
-    const val  = juryRaw[name] || '';
-    return `
-      <tr>
-        <td><div class="flag-name"><span class="flag">${flag}</span>${name}</div></td>
-        <td>
-          <input type="number" class="jury-input" id="ji-${esc(name)}"
-            min="0" max="2030" value="${esc(String(val))}"
-            oninput="updateJuryTotal()"
-            onkeydown="juryInputKey(event)">
-        </td>
-      </tr>`;
+  // Scraper status bar
+  const statusIcon = scrapeStatus === 'found' ? '✓' : scrapeStatus === 'scanning' ? '⟳' : '✕';
+  const statusText = scrapeStatus === 'found'
+    ? scrapeMsg
+    : scrapeStatus === 'scanning'
+    ? `${scrapeMsg || 'Scanning for jury scores…'}`
+    : scrapeMsg || 'Could not auto-fetch scores — enter manually below.';
+
+  const scraperBar = `
+    <div class="scraper-bar ${scrapeStatus}">
+      <span class="pulse ${scrapeStatus}"></span>
+      <span>${statusIcon} ${esc(statusText)}</span>
+      ${scrapeStatus !== 'found' ? `<button class="btn btn-outline btn-sm" style="margin-left:auto" onclick="triggerScrape(this)">Retry now</button>` : ''}
+    </div>`;
+
+  const rows = countries.map(c => {
+    const val = juryRaw[c.name] || '';
+    return `<tr>
+      <td><div class="flag-name"><span class="flag">${c.flag}</span>${esc(c.name)}</div></td>
+      <td><input type="number" class="jury-input" id="ji-${slugify(c.name)}"
+        min="0" max="2030" value="${val}"
+        oninput="updateJuryTotal()" onkeydown="juryKey(event,this)"></td>
+    </tr>`;
   }).join('');
 
-  panel.innerHTML = `
+  document.getElementById('main-panel').innerHTML = `
     <div class="phase-badge">⦿ Phase 1 — Jury Scores</div>
-
-    ${S.fetch_message ? `<div class="fetch-status ${S.fetch_message.startsWith('Could') ? 'fetch-err' : 'fetch-ok'}">${esc(S.fetch_message)}</div>` : ''}
-
+    ${scraperBar}
     <div class="card">
-      <div class="card-title">Jury Score Entry</div>
-      <div class="flex-row" style="margin-bottom:14px">
-        <button class="btn btn-outline" onclick="doFetchJury(this)">
-          ⬇ Fetch Jury Scores
-        </button>
-        <span style="font-size:13px;color:var(--text-dim)">
-          Attempts to auto-scrape from eurovision.tv, eurovisionworld.com, esctoday.com
-        </span>
-      </div>
-
-      <div id="fetch-msg"></div>
-
+      <div class="card-title">Jury Totals (35 blocs × 58 pts = 2,030 max)</div>
       <table class="jury-table">
-        <thead>
-          <tr>
-            <th>Country</th>
-            <th style="width:110px">Jury Score</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Country</th><th style="width:110px">Jury Score</th></tr></thead>
         <tbody>${rows}</tbody>
         <tfoot>
           <tr class="jury-total-row">
-            <td>Total jury points</td>
+            <td>Running total</td>
             <td id="jury-total-cell" style="text-align:center">0 / ${maxPts}</td>
           </tr>
         </tfoot>
       </table>
-
       <div class="mt-16 flex-row">
-        <button class="btn btn-gold btn-lg" onclick="doConfirmJury()">
-          Confirm Jury Scores →
-        </button>
-        <span style="font-size:13px;color:var(--text-dim)">
-          Sets reveal order & opens televote tracker
-        </span>
+        <button class="btn btn-gold btn-lg" onclick="confirmJury()">Confirm Jury Scores →</button>
+        <span style="font-size:13px;color:var(--text-dim)">Sets the televote reveal order</span>
       </div>
     </div>`;
 
   updateJuryTotal();
-
-  // Focus first empty input
-  const inputs = panel.querySelectorAll('.jury-input');
-  for (const inp of inputs) {
+  // Populate inputs from scrape if found
+  if (scrapeStatus === 'found') {
+    countries.forEach(c => {
+      const inp = document.getElementById('ji-' + slugify(c.name));
+      if (inp && juryRaw[c.name]) inp.value = juryRaw[c.name];
+    });
+    updateJuryTotal();
+  }
+  for (const inp of document.querySelectorAll('.jury-input')) {
     if (!inp.value) { inp.focus(); break; }
   }
 }
 
 function updateJuryTotal() {
-  const inputs = document.querySelectorAll('.jury-input');
   let total = 0;
-  inputs.forEach(inp => { total += parseInt(inp.value) || 0; });
+  document.querySelectorAll('.jury-input').forEach(i => { total += parseInt(i.value)||0; });
   const cell = document.getElementById('jury-total-cell');
   if (!cell) return;
   const max = S.total_jury_points || 2030;
@@ -697,330 +315,253 @@ function updateJuryTotal() {
   cell.innerHTML = `<span class="${cls}">${total}</span> / ${max}`;
 }
 
-function juryInputKey(e) {
-  if (e.key === 'Enter') {
-    const inputs = Array.from(document.querySelectorAll('.jury-input'));
-    const idx = inputs.indexOf(e.target);
-    if (idx < inputs.length - 1) inputs[idx + 1].focus();
-    else doConfirmJury();
-  }
+function juryKey(e, inp) {
+  if (e.key !== 'Enter') return;
+  const inputs = [...document.querySelectorAll('.jury-input')];
+  const i = inputs.indexOf(inp);
+  if (i < inputs.length - 1) inputs[i+1].focus();
+  else confirmJury();
 }
 
-async function doFetchJury(btn) {
-  const msg = document.getElementById('fetch-msg');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Fetching…';
-  msg.innerHTML = '';
-  try {
-    const r = await api('/api/fetch-jury');
-    if (r.success) {
-      msg.innerHTML = `<div class="fetch-status fetch-ok">✓ Loaded from ${esc(r.source)}</div>`;
-      Object.entries(r.scores).forEach(([name, score]) => {
-        const inp = document.getElementById('ji-' + esc(name));
-        if (inp) inp.value = score;
-      });
-      updateJuryTotal();
-    } else {
-      msg.innerHTML = `<div class="fetch-status fetch-err">${esc(r.error)}<br><small>Please enter scores manually below.</small></div>`;
-    }
-  } catch (e) {
-    msg.innerHTML = `<div class="fetch-status fetch-err">Network error. Please enter scores manually.</div>`;
-  }
-  btn.disabled = false;
-  btn.innerHTML = '⬇ Fetch Jury Scores';
-}
-
-async function doConfirmJury() {
-  const inputs = document.querySelectorAll('.jury-input');
+async function confirmJury() {
   const scores = {};
-  inputs.forEach(inp => {
-    const name = inp.id.replace('ji-', '').replace(/_/g, ' ');
-    // Recover exact name from the input id (we escaped it)
-    scores[name] = parseInt(inp.value) || 0;
-  });
-
-  // Map escaped ids back to real country names
-  const realScores = {};
   (S.countries || []).forEach(c => {
-    const inp = document.getElementById('ji-' + esc(c.name));
-    realScores[c.name] = inp ? (parseInt(inp.value) || 0) : 0;
+    const inp = document.getElementById('ji-' + slugify(c.name));
+    scores[c.name] = inp ? (parseInt(inp.value)||0) : 0;
   });
-
-  await api('/api/set-jury', 'POST', { scores: realScores });
+  await api('/api/set-jury', 'POST', {scores});
   await refresh();
 }
 
-// ── Televote Phase ─────────────────────────────────────────────────────────
-function renderTelvotePhase() {
-  const panel = document.getElementById('main-panel');
+async function triggerScrape(btn) {
+  btn.disabled = true; btn.textContent = '…';
+  await api('/api/scrape-now', 'POST');
+  setTimeout(async () => { await refresh(); btn.disabled = false; btn.textContent = 'Retry now'; }, 3000);
+}
+
+// ── Televote phase ─────────────────────────────────────────────
+function renderTelvote(leaderChanged = false) {
+  const countries = S.countries || [];
   const revealed = S.revealed_count || 0;
   const total = S.total_count || 25;
-  const pct = total > 0 ? (revealed / total * 100).toFixed(1) : 0;
   const pool = S.remaining_pool ?? 0;
-  const nextIdx = S.current_reveal_index || 0;
-  const countries = S.countries || [];
-  const testMode = S.test_mode;
+  const pct = total > 0 ? (revealed / total * 100).toFixed(1) : 0;
+  const next = countries.find(c => c.is_next);
   const complete = S.is_complete;
 
   let html = '';
-
-  // Test mode badge
-  if (testMode) {
-    html += `<div class="test-badge">🧪 Test Mode — Eurovision 2025 Basel</div>`;
-  }
-
-  // Phase badge
+  if (S.test_mode) html += `<div class="test-badge">🧪 Test Mode — Eurovision 2025 Basel (approximate data)</div>`;
   html += `<div class="phase-badge">⦿ Phase 2 — Televote Reveal</div>`;
 
   // Winner banner
+  const guaranteedW = countries.find(c => c.status === 'guaranteed');
+  const flashCls = leaderChanged ? ' flash-banner' : '';
   if (complete) {
-    const winner = countries.find(c => c.status === 'leading');
-    if (winner) {
-      html += `
-        <div class="winner-banner">
-          <div class="trophy">🏆</div>
-          <div class="winner-name">${winner.flag} ${esc(winner.name)}</div>
-          <div class="winner-score">${winner.combined} points · Jury ${winner.jury_score} + Televote ${winner.tv_score}</div>
-        </div>`;
-    }
+    const w = countries.find(c => c.status === 'leading');
+    if (w) html += `
+      <div class="winner-banner${flashCls}">
+        <div class="trophy">🏆</div>
+        <div class="winner-name">${w.flag} ${esc(w.name)}</div>
+        <div class="winner-score">${w.combined} pts · <span style="color:#a0c4ff">Jury ${w.jury}</span> + <span style="color:#ffc078">Televote ${w.tv}</span></div>
+      </div>`;
+  } else if (guaranteedW) {
+    html += `
+      <div class="winner-banner${flashCls}">
+        <div class="trophy">🏆</div>
+        <div class="winner-name">${guaranteedW.flag} ${esc(guaranteedW.name)}</div>
+        <div class="winner-score" style="color:var(--green)">
+          Guaranteed winner! · <span style="color:#a0c4ff">Jury ${guaranteedW.jury}</span> + <span style="color:#ffc078">at least ${guaranteedW.guaranteed_tv} televote</span> = ${guaranteedW.guaranteed_total} pts
+        </div>
+      </div>`;
   }
 
-  // Progress
+  // Progress bar
   html += `
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" style="width:${pct}%"></div>
-    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
     <div class="progress-label">
       <span>${revealed} of ${total} televotes revealed</span>
       <span>${pool} pts remaining in pool</span>
     </div>`;
 
   // Next-up card
-  if (!complete) {
-    const next = countries.find(c => c.is_next);
-    if (next) {
-      html += `
-        <div class="next-card">
-          <div class="next-label">Next to Reveal</div>
-          <div class="next-country">
-            <span class="next-flag">${next.flag}</span>
-            <div>
-              <div class="next-name">${esc(next.name)}</div>
-              <div class="next-jury">Jury score: <strong>${next.jury_score}</strong> pts · Max possible: <strong>${next.max_possible}</strong></div>
-              ${next.fair_share !== null ? `
-              <div class="next-jury" style="margin-top:4px">
-                Fair-share estimate: ~<strong>${next.fair_share}</strong> pts
-                ${next.trend_floor ? ` · Trend floor ≥<strong>${next.trend_floor}</strong>` : ''}
-              </div>` : ''}
-            </div>
-          </div>
-          <div class="reveal-row">
-            <input type="number" id="reveal-input" min="0" max="2204" placeholder="Score"
-              onkeydown="revealKey(event)" autofocus>
-            <button class="btn btn-gold btn-lg" onclick="doReveal()">Reveal ⟶</button>
-          </div>
-          ${testMode ? `
-          <div class="test-controls">
-            <button class="btn btn-blue btn-sm" onclick="doTestRevealNext()">▶ Auto-reveal next (${esc(next.name)})</button>
-            <button class="btn btn-outline btn-sm" onclick="doTestRevealAll()">⏩ Auto-reveal all</button>
-          </div>` : ''}
-        </div>`;
-    }
-  } else if (testMode) {
+  if (!complete && next) {
     html += `
-      <div class="card">
-        <div class="all-done-note">All ${total} countries revealed. Final results shown.</div>
-        <div class="test-controls">
-          <button class="btn btn-blue btn-sm" onclick="doTestRevealAll()">Already complete</button>
+      <div class="next-card">
+        <div class="next-label">Next to Reveal</div>
+        <div class="next-country">
+          <span class="next-flag">${next.flag}</span>
+          <div>
+            <div class="next-name">${esc(next.name)}</div>
+            <div class="next-jury">Jury: <strong>${next.jury}</strong> pts &nbsp;·&nbsp; Max possible: <strong>${next.max_possible}</strong></div>
+            ${next.needed_to_lead !== null ? `
+            <div class="next-jury" style="margin-top:4px">
+              ${next.needed_to_lead === 0
+                ? `<span style="color:var(--green)">✓ Already leads — any score keeps them ahead</span>`
+                : `Needs <strong style="color:${next.can_reach_lead ? 'var(--gold)':'var(--red)'}">${next.needed_to_lead} pts</strong> televote to take the lead`}
+              ${next.is_guaranteed_winner ? ` &nbsp;·&nbsp;<span style="color:var(--green)">🏆 Guaranteed (gets all ${next.guaranteed_tv} remaining)</span>` : ''}
+            </div>` : ''}
+            ${next.fair_share !== null ? `
+            <div class="next-jury" style="margin-top:2px;font-size:13px">
+              Fair-share: ~<strong>${next.fair_share}</strong>
+              ${next.trend_floor ? ` · Trend floor ≥<strong>${next.trend_floor}</strong>` : ''}
+            </div>` : ''}
+          </div>
         </div>
+        <div class="reveal-row">
+          <input type="number" id="reveal-input" min="0" max="2204" placeholder="Score"
+            onkeydown="if(event.key==='Enter') doReveal()">
+          <button class="btn btn-gold btn-lg" onclick="doReveal()">Reveal ⟶</button>
+        </div>
+        ${S.test_mode ? `
+        <div class="test-controls">
+          <button class="btn btn-blue btn-sm" onclick="testNext()">▶ Auto-reveal next (${esc(next.name)})</button>
+          <button class="btn btn-outline btn-sm" onclick="testAll()">⏩ Auto-reveal all</button>
+        </div>` : ''}
       </div>`;
+  } else if (complete && S.test_mode) {
+    html += `<div class="card" style="text-align:center;padding:16px;color:var(--text-dim)">All ${total} countries revealed.</div>`;
   }
 
-  // Country list in reveal order
-  html += `<ul class="country-list">`;
-
-  countries.forEach((c, i) => {
-    const rowClass = [
-      c.is_next ? 'is-next' : '',
-      c.is_revealed ? 'revealed' : '',
-      c.status === 'eliminated' ? 'eliminated' : '',
-    ].filter(Boolean).join(' ');
-
-    const statusIcon =
-      c.status === 'leading'    ? '🏆' :
-      c.status === 'eliminated' ? '❌' :
-      c.status === 'pending'    ? '⏳' :
-      c.status === 'confirmed'  ? '✅' : '⬜';
-
-    let tvCell, totalCell;
-    if (c.is_revealed) {
-      tvCell    = `<span class="tv-revealed">${c.tv_score}</span>`;
-      totalCell = `<span class="total-revealed">${c.combined}</span>`;
-    } else {
-      tvCell    = `<span class="tv-pending">—</span>`;
-      totalCell = `<span class="total-pending">max ${c.max_possible}</span>`;
-    }
-
-    let estimatesHtml = '';
-    if (!c.is_revealed && c.fair_share !== null) {
-      estimatesHtml = `
-        <div class="estimates">
-          ~<em>${c.fair_share}</em> fair-share
-          ${c.trend_floor ? `· ≥<em>${c.trend_floor}</em> trend floor` : ''}
-        </div>`;
-    }
-
+  // Unrevealed list
+  const unrevealed = countries.filter(c => !c.is_revealed);
+  if (unrevealed.length > 0) {
     html += `
-      <li class="country-row ${rowClass}">
-        <span class="col-pos">${i + 1}</span>
-        <span class="col-name">
-          <span class="flag">${c.flag}</span>
-          <span>
-            ${esc(c.name)}
-            ${estimatesHtml}
-          </span>
-        </span>
-        <span class="col-jury">${c.jury_score}</span>
-        <span class="col-tv">${tvCell}</span>
-        <span class="col-total">${totalCell}</span>
-        <span class="col-icon">${statusIcon}</span>
-      </li>`;
-  });
+      <div class="list-header">
+        <span></span><span>Awaiting reveal</span>
+        <span style="text-align:center">Jury</span>
+        <span style="text-align:center">Needs to lead</span>
+        <span style="text-align:center">Max total</span>
+        <span></span>
+      </div>
+      <ul class="country-list">`;
+    unrevealed.forEach(c => {
+      const isElim = c.status === 'eliminated';
+      const isGuar = c.status === 'guaranteed';
+      const cls = [c.is_next?'is-next':'', isElim?'eliminated':''].filter(Boolean).join(' ');
+      const icon = isGuar ? '🏆' : isElim ? '❌' : c.is_next ? '⏳' : '⬜';
+      let badge;
+      if (isElim)           badge = `<span class="needs-badge unreachable">can't win</span>`;
+      else if (isGuar)      badge = `<span class="needs-badge guaranteed">🏆 won</span>`;
+      else if (c.needed_to_lead === 0) badge = `<span class="needs-badge leading">leads already</span>`;
+      else {
+        const bc = c.can_reach_lead ? 'reachable' : 'unreachable';
+        badge = `<span class="needs-badge ${bc}">${c.needed_to_lead} pts</span>`;
+      }
+      const estParts = [];
+      if (c.fair_share !== null) estParts.push(`~${c.fair_share} est`);
+      if (c.trend_floor)         estParts.push(`≥${c.trend_floor} trend`);
+      const est = estParts.length ? `<div class="estimates">${estParts.join(' · ')}</div>` : '';
+      html += `
+        <li class="country-row ${cls}">
+          <span class="col-pos">${c.pos+1}</span>
+          <span class="col-name"><span class="flag">${c.flag}</span><span>${esc(c.name)}${est}</span></span>
+          <span class="col-jury">${c.jury}</span>
+          <span class="col-needs">${badge}</span>
+          <span class="col-max">≤${c.max_possible}</span>
+          <span class="col-icon">${icon}</span>
+        </li>`;
+    });
+    html += `</ul>`;
+  } else if (complete) {
+    html += `<p style="text-align:center;color:var(--text-dim);padding:16px 0;font-size:14px">All countries revealed — see leaderboard →</p>`;
+  }
 
-  html += `</ul>`;
-
-  panel.innerHTML = html;
-
-  // Focus reveal input
+  document.getElementById('main-panel').innerHTML = html;
   const ri = document.getElementById('reveal-input');
   if (ri) ri.focus();
 }
 
+// ── Leaderboard ────────────────────────────────────────────────
+function renderLeaderboard(leaderChanged = false) {
+  const el = document.getElementById('leaderboard-content');
+  if (S.phase === 'jury') {
+    el.innerHTML = `<p style="color:var(--text-dim);font-size:13px;padding:10px 0">Leaderboard opens after jury scores are confirmed.</p>`;
+    return;
+  }
+  const lb = S.leaderboard || [];
+  const bestTotal = S.best_total || 0;
+
+  let html = `
+    <div class="lb-stats">
+      <div class="lb-stat"><div class="lb-stat-val">${S.revealed_count||0}/${S.total_count||25}</div><div class="lb-stat-label">Revealed</div></div>
+      <div class="lb-stat"><div class="lb-stat-val">${S.remaining_pool??0}</div><div class="lb-stat-label">Pool Left</div></div>
+    </div>`;
+
+  let rank = 0, lastScore = -1;
+  lb.forEach(c => {
+    if (c.is_revealed && c.combined !== lastScore) { rank++; lastScore = c.combined; }
+    const isLeader = c.status === 'leading' || c.status === 'guaranteed';
+    const rowCls = [
+      isLeader ? 'lb-leader' : '',
+      c.status === 'eliminated' ? 'lb-eliminated' : '',
+      isLeader && leaderChanged ? 'flash-row' : '',
+    ].filter(Boolean).join(' ');
+    const icon = {leading:'🏆',guaranteed:'🏆',eliminated:'❌',pending:'⏳',confirmed:'✅'}[c.status]||'';
+    const scoreHtml = c.is_revealed
+      ? `<div class="lb-score-wrap">
+           <span class="lb-score revealed">${c.combined}</span>
+           ${bestTotal > c.combined ? `<span class="lb-behind">–${bestTotal - c.combined}</span>` : ''}
+         </div>`
+      : `<div class="lb-score-wrap"><span class="lb-score pending">≤${c.max_possible}</span></div>`;
+    const splitHtml = c.is_revealed
+      ? `<div class="lb-split"><span class="jury-part">${c.jury}</span> + <span class="tv-part">${c.tv}</span></div>`
+      : '';
+    html += `
+      <div class="lb-row ${rowCls}">
+        <span class="lb-rank">${c.is_revealed ? rank : '—'}</span>
+        <span class="lb-flag">${c.flag}</span>
+        <span class="lb-name"><div class="lb-name-main">${esc(c.name)}</div>${splitHtml}</span>
+        ${scoreHtml}
+        <span class="lb-status">${icon}</span>
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── Actions ────────────────────────────────────────────────────
 async function doReveal() {
   const inp = document.getElementById('reveal-input');
   if (!inp) return;
-  const score = parseInt(inp.value) || 0;
+  const score = parseInt(inp.value)||0;
   inp.value = '';
-  await api('/api/reveal', 'POST', { score });
-  await refresh();
-  const ri2 = document.getElementById('reveal-input');
-  if (ri2) ri2.focus();
-}
-
-function revealKey(e) {
-  if (e.key === 'Enter') doReveal();
-}
-
-// ── Test actions ───────────────────────────────────────────────────────────
-async function doTestRevealNext() {
-  await api('/api/test-reveal-next', 'POST');
+  await api('/api/reveal', 'POST', {score});
   await refresh();
   const ri = document.getElementById('reveal-input');
   if (ri) ri.focus();
 }
 
-async function doTestRevealAll() {
+async function testNext() {
+  await api('/api/test-reveal-next', 'POST');
+  await refresh();
+}
+
+async function testAll() {
   await api('/api/test-reveal-all', 'POST');
   await refresh();
 }
 
-// ── Leaderboard ────────────────────────────────────────────────────────────
-function renderLeaderboard() {
-  const el = document.getElementById('leaderboard-content');
-  const lb = S.leaderboard || [];
-  const phase = S.phase || 'jury';
-  const revealed = S.revealed_count || 0;
-  const total = S.total_count || 25;
-  const pool = S.remaining_pool ?? 0;
-
-  if (phase === 'jury') {
-    el.innerHTML = `<p style="color:var(--text-dim);font-size:13px;padding:10px 0">
-      Leaderboard available after jury scores are confirmed.</p>`;
-    return;
-  }
-
-  let statsHtml = `
-    <div class="lb-stats">
-      <div class="lb-stat">
-        <div class="lb-stat-val">${revealed}/${total}</div>
-        <div class="lb-stat-label">Revealed</div>
-      </div>
-      <div class="lb-stat">
-        <div class="lb-stat-val">${pool}</div>
-        <div class="lb-stat-label">Pool Left</div>
-      </div>
-    </div>`;
-
-  if (S.best_country && S.best_total) {
-    const flags = S.country_flags || {};
-    statsHtml += `
-      <div style="text-align:center;padding:8px 0 12px;font-size:13px;color:var(--text-dim)">
-        Leader: <strong style="color:var(--gold)">${flags[S.best_country] || ''} ${esc(S.best_country)}</strong>
-        <span style="color:var(--text)"> ${S.best_total} pts</span>
-      </div>`;
-  }
-
-  let rank = 0;
-  let lastScore = -1;
-  const rows = lb.map((c, i) => {
-    if (c.is_revealed) {
-      if (c.combined !== lastScore) rank++;
-      lastScore = c.combined;
-    }
-
-    const rowClass = [
-      c.status === 'leading'    ? 'lb-leader' : '',
-      c.status === 'eliminated' ? 'lb-eliminated' : '',
-    ].filter(Boolean).join(' ');
-
-    const icon =
-      c.status === 'leading'    ? '🏆' :
-      c.status === 'eliminated' ? '❌' :
-      c.status === 'pending'    ? '⏳' : '✅';
-
-    const scoreHtml = c.is_revealed
-      ? `<span class="lb-score revealed">${c.combined}</span>`
-      : `<span class="lb-score pending">≤${c.max_possible}</span>`;
-
-    const rankLabel = c.is_revealed ? rank : '—';
-
-    return `
-      <div class="lb-row ${rowClass}">
-        <span class="lb-rank">${rankLabel}</span>
-        <span class="lb-flag">${c.flag}</span>
-        <span class="lb-name">${esc(c.name)}</span>
-        ${scoreHtml}
-        <span class="lb-status">${icon}</span>
-      </div>`;
-  }).join('');
-
-  el.innerHTML = statsHtml + rows;
-}
-
-// ── Global actions ─────────────────────────────────────────────────────────
 async function loadTest() {
-  if (!confirm('Load 2025 test data? This will reset current state.')) return;
+  if (!confirm('Load 2025 test data? This resets current state.')) return;
+  prevLeader = null;
   await api('/api/load-test-2025', 'POST');
   await refresh();
 }
 
 async function doReset() {
   if (!confirm('Reset everything and return to live 2026 mode?')) return;
+  prevLeader = null;
   await api('/api/reset', 'POST');
   await refresh();
 }
 
-// ── HTML escape helper ─────────────────────────────────────────────────────
+// ── Util ───────────────────────────────────────────────────────
 function esc(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function slugify(s) { return s.toLowerCase().replace(/[^a-z0-9]/g,'_'); }
 
-// ── Init ───────────────────────────────────────────────────────────────────
-refresh();
+// ── Init ───────────────────────────────────────────────────────
+refresh().then(startPolling);
 </script>
 </body>
 </html>
