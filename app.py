@@ -10,8 +10,37 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger('eurovision')
 
-# ── 2026 Competing Countries ──────────────────────────────────────────────────
-COUNTRIES_2026 = [
+# ══════════════════════════════════════════════════════════════════════════════
+# YEAR CONFIGURATION — update this section each year
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Checklist for 2027 (or any future year):
+#   1. Update CONTEST_YEAR, HOST_CITY
+#   2. Replace COMPETING_COUNTRIES with the actual Grand Final qualifiers
+#      (Big 5 + host are automatic; others come from semi-final results)
+#   3. Update JURY_BLOCS and TELEVOTE_BLOCS
+#      - JURY_BLOCS  = number of countries with national juries (usually 37-38)
+#      - TELEVOTE_BLOCS = JURY_BLOCS + 1 (Rest of World online vote)
+#      - Check the EBU press release for exact numbers
+#   4. Check whether any country is boycotting (affects jury bloc count)
+#   5. Move current year data down into the PREVIOUS YEAR section below
+
+CONTEST_YEAR  = 2026
+HOST_CITY     = 'Vienna'
+
+# Points awarded per voting bloc — constant every year: 1+2+3+4+5+6+7+8+10+12
+POINTS_PER_BLOC = 58
+
+# 2026: 25 competing countries, 35 jury blocs, 36 televote blocs (35 + Rest of World)
+# Spain boycotted so is not in the jury count despite being a Big 5 country
+JURY_BLOCS       = 35
+TELEVOTE_BLOCS   = 36
+TOTAL_JURY_PTS   = JURY_BLOCS * POINTS_PER_BLOC       # 2030
+TOTAL_TV_PTS     = TELEVOTE_BLOCS * POINTS_PER_BLOC   # 2088
+
+# 25 competing countries for 2026
+# To update for 2027: replace this list with the actual Grand Final qualifiers
+COMPETING_COUNTRIES = [
     {'name': 'Albania',        'flag': '🇦🇱'},
     {'name': 'Australia',      'flag': '🇦🇺'},
     {'name': 'Austria',        'flag': '🇦🇹'},
@@ -39,11 +68,22 @@ COUNTRIES_2026 = [
     {'name': 'United Kingdom', 'flag': '🇬🇧'},
 ]
 
-# ── 2025 Test Data (Basel) ────────────────────────────────────────────────────
-# 26 countries, 37 jury blocs (2,146 pts), 38 televote blocs (2,204 pts)
-# Winner: Austria (JJ) — 258 jury + 178 televote = 436
-# NOTE: Approximate figures for testing purposes.
-COUNTRIES_2025 = [
+# Wikipedia page used for live scraping — update the year each time
+WIKI_PAGE = f'Eurovision_Song_Contest_{CONTEST_YEAR}'
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PREVIOUS YEAR TEST DATA  (2025 Basel — approximate figures)
+# When building for 2027, move 2026 actual results here and replace 2025.
+# ══════════════════════════════════════════════════════════════════════════════
+
+PREV_YEAR          = 2025
+PREV_HOST_CITY     = 'Basel'
+PREV_JURY_BLOCS    = 37
+PREV_TV_BLOCS      = 38
+PREV_JURY_PTS      = PREV_JURY_BLOCS * POINTS_PER_BLOC    # 2146
+PREV_TV_PTS        = PREV_TV_BLOCS * POINTS_PER_BLOC      # 2204
+
+COUNTRIES_PREV = [
     {'name': 'Albania',     'flag': '🇦🇱'}, {'name': 'Armenia',     'flag': '🇦🇲'},
     {'name': 'Australia',   'flag': '🇦🇺'}, {'name': 'Austria',     'flag': '🇦🇹'},
     {'name': 'Denmark',     'flag': '🇩🇰'}, {'name': 'Estonia',     'flag': '🇪🇪'},
@@ -59,7 +99,7 @@ COUNTRIES_2025 = [
     {'name': 'Switzerland', 'flag': '🇨🇭'}, {'name': 'Ukraine',     'flag': '🇺🇦'},
 ]
 
-JURY_2025 = {
+JURY_PREV = {
     'Albania': 50,  'Armenia': 32,  'Australia': 156, 'Austria': 258,
     'Denmark': 29,  'Estonia': 54,  'Finland': 88,    'France': 194,
     'Georgia': 45,  'Germany': 13,  'Greece': 42,     'Iceland': 24,
@@ -69,7 +109,7 @@ JURY_2025 = {
     'Switzerland': 124, 'Ukraine': 89,
 }
 
-TELEVOTE_2025 = {
+TELEVOTE_PREV = {
     'Albania': 184, 'Armenia': 72,  'Australia': 44,  'Austria': 178,
     'Denmark': 24,  'Estonia': 54,  'Finland': 133,   'France': 42,
     'Georgia': 48,  'Germany': 8,   'Greece': 121,    'Iceland': 42,
@@ -84,15 +124,15 @@ TELEVOTE_2025 = {
 def make_default_state():
     return {
         'phase': 'jury',
-        'countries': [c.copy() for c in COUNTRIES_2026],
+        'countries': [c.copy() for c in COMPETING_COUNTRIES],
         'jury_scores': {},
         'televote_scores': {},
         'reveal_order': [],
         'current_reveal_index': 0,
-        'total_jury_blocs': 35,
-        'total_televote_blocs': 36,
-        'total_jury_points': 2030,
-        'total_televote_points': 2088,
+        'total_jury_blocs': JURY_BLOCS,
+        'total_televote_blocs': TELEVOTE_BLOCS,
+        'total_jury_points': TOTAL_JURY_PTS,
+        'total_televote_points': TOTAL_TV_PTS,
         'test_mode': False,
         # Scraper state
         'scrape_status': 'idle',      # idle | scanning | found | failed
@@ -301,14 +341,14 @@ def load_test_2025():
         state = make_default_state()
         state.update({
             'phase': 'televote',
-            'countries': [c.copy() for c in COUNTRIES_2025],
-            'jury_scores': dict(JURY_2025),
+            'countries': [c.copy() for c in COUNTRIES_PREV],
+            'jury_scores': dict(JURY_PREV),
             'televote_scores': {},
             'reveal_order': [],
-            'total_jury_blocs': 37,
-            'total_televote_blocs': 38,
-            'total_jury_points': 2146,
-            'total_televote_points': 2204,
+            'total_jury_blocs': PREV_JURY_BLOCS,
+            'total_televote_blocs': PREV_TV_BLOCS,
+            'total_jury_points': PREV_JURY_PTS,
+            'total_televote_points': PREV_TV_PTS,
             'test_mode': True,
             'scrape_status': 'idle',
         })
@@ -323,7 +363,7 @@ def test_reveal_next():
         if idx >= len(state['reveal_order']):
             return jsonify({'success': False, 'error': 'All countries revealed'})
         name = state['reveal_order'][idx]
-        state['televote_scores'][name] = TELEVOTE_2025.get(name, 0)
+        state['televote_scores'][name] = TELEVOTE_PREV.get(name, 0)
         state['current_reveal_index'] = idx + 1
     return jsonify({'success': True, 'country': name})
 
@@ -332,7 +372,7 @@ def test_reveal_next():
 def test_reveal_all():
     with state_lock:
         for name in state['reveal_order'][state['current_reveal_index']:]:
-            state['televote_scores'][name] = TELEVOTE_2025.get(name, 0)
+            state['televote_scores'][name] = TELEVOTE_PREV.get(name, 0)
         state['current_reveal_index'] = len(state['reveal_order'])
     return jsonify({'success': True})
 
@@ -494,10 +534,14 @@ def _json_scores(text, names):
 
 
 def scrape_eurovision_tv(names):
-    r = _get('https://eurovision.tv/event/vienna-2026/grand-final/results')
+    url = f'https://eurovision.tv/event/{HOST_CITY.lower()}-{CONTEST_YEAR}/grand-final/results'
+    r = _get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
     scores = {}
-    # Try structured data first
+    # Results table uses Alpine.js x-data attribute containing JSON score arrays
+    for tag in soup.find_all(attrs={'x-data': True}):
+        scores.update(_json_scores(tag.get('x-data', ''), names))
+    # Fallback: JSON-LD and inline scripts
     for script in soup.find_all('script', type='application/ld+json'):
         scores.update(_json_scores(script.string or '', names))
     for script in soup.find_all('script'):
@@ -512,7 +556,7 @@ def scrape_eurovision_tv(names):
 
 
 def scrape_eurovisionworld(names):
-    r = _get('https://eurovisionworld.com/eurovision/2026')
+    r = _get(f'https://eurovisionworld.com/eurovision/{CONTEST_YEAR}')
     soup = BeautifulSoup(r.text, 'html.parser')
     scores = _table_scores(soup, names)
     if not scores:
